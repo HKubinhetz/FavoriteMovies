@@ -12,6 +12,7 @@ import requests
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///movies.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 Bootstrap(app)
 
@@ -45,11 +46,32 @@ class Movie(db.Model):
 # db.session.add(first_movie)
 # db.session.commit()
 
+# --------------------------------- FUNCTIONS ---------------------------------
+
+def query_movies():
+    # This function finds all movies in the Database, if any, and returns them.
+    all_movies = []
+    movies = db.session.query(Movie).all()
+    for movie in movies:
+        movies_info = {
+            "id": movie.id,
+            "title": movie.title,
+            "year": movie.year,
+            "description": movie.description,
+            "rating": movie.rating,
+            "ranking": movie.ranking,
+            "review": movie.review,
+            "img_url": movie.img_url,
+        }
+        all_movies.append(movies_info)
+    return all_movies
+
 
 # ---------------------------------- ROUTING ----------------------------------
 @app.route("/")
 def home():
-    return render_template("index.html")
+    movie_data = query_movies()
+    return render_template("index.html", movies=movie_data)
 
 
 # --------------------------------- EXECUTION ---------------------------------
