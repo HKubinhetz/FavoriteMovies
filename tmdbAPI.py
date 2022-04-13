@@ -3,10 +3,10 @@ import os
 
 TMDB_API_KEY = os.environ['TMDBAPI']
 
-answer = requests.get(f"https://api.themoviedb.org/3/movie/550?api_key={TMDB_API_KEY}")
+answer = requests.get(f"https://api.themoviedb.org/3/movie/500?api_key={TMDB_API_KEY}")
 print(answer.json())
 
-# TO DO!
+# TODO!
 # https://www.udemy.com/course/100-days-of-code/learn/lecture/22616320#questions/16005400
 #
 # You will need to read the documentation on The Movie Database to figure out how to request
