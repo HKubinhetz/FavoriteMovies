@@ -8,6 +8,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 import requests
 
+
 # ---------------------------- FLASK SERVER CONFIG ----------------------------
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -46,8 +47,8 @@ class Movie(db.Model):
 # db.session.add(first_movie)
 # db.session.commit()
 
-# --------------------------------- FUNCTIONS ---------------------------------
 
+# --------------------------------- FUNCTIONS ---------------------------------
 def query_movies():
     # This function finds all movies in the Database, if any, and returns them.
     all_movies = []
@@ -67,11 +68,56 @@ def query_movies():
     return all_movies
 
 
+# ----------------------------------- FORMS -----------------------------------
+class ReviewMovieForm(FlaskForm):
+    rating = StringField('Your new rating', validators=[DataRequired()])
+    review = StringField('Your new movie review', validators=[DataRequired()])
+    submit = SubmitField('Done!')
+
+
+class AddMovieForm(FlaskForm):
+    title = StringField('Movie Title', validators=[DataRequired()])
+    submit = SubmitField('Search!')
+
+
 # ---------------------------------- ROUTING ----------------------------------
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def home():
-    movie_data = query_movies()
-    return render_template("index.html", movies=movie_data)
+    moviedata = query_movies()
+    return render_template("index.html", movies=moviedata)
+
+
+@app.route("/add", methods=['GET', 'POST'])
+def add():
+    form = AddMovieForm()
+    if form.validate_on_submit():
+        movie_title = form.title.data
+        print(movie_title)
+        return redirect(url_for('home'))
+    return render_template("add.html", form=form)
+
+
+@app.route("/edit/<movieid>", methods=['GET', 'POST'])
+def edit(movieid):
+    form = ReviewMovieForm()
+    moviedata = query_movies()
+    if form.validate_on_submit():
+        movie_rating = form.rating.data
+        movie_review = form.review.data
+        movie_to_update = Movie.query.filter_by(id=movieid).first()           # Finds the movie in the DB
+        movie_to_update.rating = movie_rating                                 # Updates the rating
+        movie_to_update.review = movie_review                                 # Updates the review
+        db.session.commit()                                                   # Commits the update
+        return redirect(url_for('home'))                                      # Redirects the user to home
+    return render_template("edit.html", movies=moviedata, id=movieid, form=form)
+
+
+@app.route("/delete/<movieid>")
+def delete(movieid):
+    movie_to_delete = Movie.query.filter_by(id=movieid).first()  # Finds the movie in the DB
+    db.session.delete(movie_to_delete)                           # Deletes the movie
+    db.session.commit()                                          # Commits the update
+    return redirect(url_for('home'))
 
 
 # --------------------------------- EXECUTION ---------------------------------
