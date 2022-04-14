@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
-import requests
+import tmdbAPI
 
 
 # ---------------------------- FLASK SERVER CONFIG ----------------------------
@@ -92,13 +92,29 @@ def add():
     form = AddMovieForm()
     if form.validate_on_submit():
         movie_title = form.title.data
-        print(movie_title)
-        return redirect(url_for('home'))
+        movies = tmdbAPI.search_movie(movie_title)
+        print(movies)
+        return render_template("select.html", movies=movies)
     return render_template("add.html", form=form)
 
 
 @app.route("/edit/<movieid>", methods=['GET', 'POST'])
 def edit(movieid):
+    form = ReviewMovieForm()
+    moviedata = query_movies()
+    if form.validate_on_submit():
+        movie_rating = form.rating.data
+        movie_review = form.review.data
+        movie_to_update = Movie.query.filter_by(id=movieid).first()           # Finds the movie in the DB
+        movie_to_update.rating = movie_rating                                 # Updates the rating
+        movie_to_update.review = movie_review                                 # Updates the review
+        db.session.commit()                                                   # Commits the update
+        return redirect(url_for('home'))                                      # Redirects the user to home
+    return render_template("edit.html", movies=moviedata, id=movieid, form=form)
+
+
+@app.route("/selected/<movieid>")
+def selected(movieid):
     form = ReviewMovieForm()
     moviedata = query_movies()
     if form.validate_on_submit():
