@@ -33,26 +33,15 @@ class Movie(db.Model):
 # db.create_all()
 
 
-# # Creating a new data entry. Run just once!
-# first_movie = Movie(
-#     title="Phone Booth",
-#     year=2002,
-#     description="Publicist Stuart Shepard finds himself trapped in a phone booth, pinned down by an extortionist's sniper rifle. Unable to leave or receive outside help, Stuart's negotiation with the caller leads to a jaw-dropping climax.",
-#     rating=7.3,
-#     ranking=10,
-#     review="My favourite character was the caller.",
-#     img_url="https://image.tmdb.org/t/p/w500/tjrX2oWRCM3Tvarz38zlZM7Uc10.jpg",
-# )
-#
-# db.session.add(first_movie)
-# db.session.commit()
+# --------------------------------- CONSTANTS ---------------------------------
+global tmdb_movielist
 
 
 # --------------------------------- FUNCTIONS ---------------------------------
 def query_movies():
     # This function finds all movies in the Database, if any, and returns them.
     all_movies = []
-    movies = db.session.query(Movie).all()
+    movies = db.session.query(Movie).order_by("rating").all()
     for movie in movies:
         movies_info = {
             "id": movie.id,
@@ -65,13 +54,14 @@ def query_movies():
             "img_url": movie.img_url,
         }
         all_movies.append(movies_info)
+        print(all_movies)
     return all_movies
 
 
 # ----------------------------------- FORMS -----------------------------------
 class ReviewMovieForm(FlaskForm):
-    rating = StringField('Your new rating', validators=[DataRequired()])
-    review = StringField('Your new movie review', validators=[DataRequired()])
+    rating = StringField('Your rating', validators=[DataRequired()])
+    review = StringField('Your movie review', validators=[DataRequired()])
     submit = SubmitField('Done!')
 
 
@@ -89,12 +79,12 @@ def home():
 
 @app.route("/add", methods=['GET', 'POST'])
 def add():
+    global tmdb_movielist
     form = AddMovieForm()
     if form.validate_on_submit():
         movie_title = form.title.data
-        movies = tmdbAPI.search_movie(movie_title)
-        print(movies)
-        return render_template("select.html", movies=movies)
+        tmdb_movielist = tmdbAPI.search_movie(movie_title)
+        return render_template("select.html", movies=tmdb_movielist)
     return render_template("add.html", form=form)
 
 
@@ -113,19 +103,32 @@ def edit(movieid):
     return render_template("edit.html", movies=moviedata, id=movieid, form=form)
 
 
-@app.route("/selected/<movieid>")
+@app.route("/selected/<movieid>", methods=['GET', 'POST'])
 def selected(movieid):
+
     form = ReviewMovieForm()
-    moviedata = query_movies()
     if form.validate_on_submit():
+        global tmdb_movielist
+        movie = tmdb_movielist[int(movieid)]
         movie_rating = form.rating.data
         movie_review = form.review.data
-        movie_to_update = Movie.query.filter_by(id=movieid).first()           # Finds the movie in the DB
-        movie_to_update.rating = movie_rating                                 # Updates the rating
-        movie_to_update.review = movie_review                                 # Updates the review
-        db.session.commit()                                                   # Commits the update
-        return redirect(url_for('home'))                                      # Redirects the user to home
-    return render_template("edit.html", movies=moviedata, id=movieid, form=form)
+
+        selected_movie = Movie(
+            title=movie['title'],
+            year=movie['release_date'].split('-')[0],
+            description=movie['overview'],
+            rating=movie_rating,
+            ranking=0,
+            review=movie_review,
+            img_url=f"https://image.tmdb.org/t/p/w500{movie['poster_path']}",
+        )
+
+        db.session.add(selected_movie)
+        db.session.commit()
+        return redirect(url_for("home"))
+
+    return render_template("edit.html", form=form)
+    # return render_template("edit.html", movies=moviedata, id=movieid, form=form)
 
 
 @app.route("/delete/<movieid>")
