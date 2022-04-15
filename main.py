@@ -1,5 +1,4 @@
 # ---------------------------------- IMPORTS ----------------------------------
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
@@ -10,16 +9,17 @@ import tmdbAPI
 
 
 # ---------------------------- FLASK SERVER CONFIG ----------------------------
-app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///movies.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-Bootstrap(app)
+app = Flask(__name__)                                                   # Server Creation
+app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'           # A random alphanumeric key for safety
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///movies.db'           # Creating the database link
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False                    # Not tracking every modification
+db = SQLAlchemy(app)                                                    # Creating the DB instance
+Bootstrap(app)                                                          # Implementing Bootstrap
 
 
 # ---------------------------------- DATABASE ---------------------------------
 class Movie(db.Model):
+    # Database structure for its creation and CRUD operations.
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), unique=True, nullable=False)
     year = db.Column(db.Integer, nullable=False)
@@ -34,6 +34,7 @@ class Movie(db.Model):
 
 
 # --------------------------------- CONSTANTS ---------------------------------
+# This is a list of movies from the API that will be used around the code.
 global tmdb_movielist
 
 
@@ -60,12 +61,16 @@ def query_movies():
 
 # ----------------------------------- FORMS -----------------------------------
 class ReviewMovieForm(FlaskForm):
+    # This is a form to input a rating and a review for a given movie.
+    # It has two text fields and a submit button.
     rating = StringField('Your rating', validators=[DataRequired()])
     review = StringField('Your movie review', validators=[DataRequired()])
     submit = SubmitField('Done!')
 
 
 class AddMovieForm(FlaskForm):
+    # This is a simple form for the user to inform a movie title they want to add.
+    # It is going to be used as a search query.
     title = StringField('Movie Title', validators=[DataRequired()])
     submit = SubmitField('Search!')
 
@@ -73,12 +78,17 @@ class AddMovieForm(FlaskForm):
 # ---------------------------------- ROUTING ----------------------------------
 @app.route("/", methods=['GET', 'POST'])
 def home():
+    # Home routing, user sees this when loading the website.
+    # The existing movie list will be displayed here.
     moviedata = query_movies()
     return render_template("index.html", movies=moviedata)
 
 
 @app.route("/add", methods=['GET', 'POST'])
 def add():
+    # Route for when user wishes to add a new movie.
+    # It consists of a form where the user inputs the movie name and
+    # the code searches for the title on the internet.
     global tmdb_movielist
     form = AddMovieForm()
     if form.validate_on_submit():
