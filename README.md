@@ -23,10 +23,29 @@ If the user wants to delete a movie, it is easily possible through the simple pr
 
 
 
-##Code
+## Code
 Feel free to visit the main.py code and check for comments on execution there! I made an effort to be as thorough as possible with the documentation.
-![image](https://user-images.githubusercontent.com/31540553/163635791-a4e3cfb8-1f96-4299-a23e-e0af82a61fdb.png)
+Here's a quick example of what you can expect.
+
+      selected_movie = Movie(
+            # Movie structure just like the database requires.
+            title=movie['title'],
+            year=movie['release_date'].split('-')[0],
+            description=movie['overview'],
+            rating=movie_rating,
+            ranking=0,
+            review=movie_review,
+            img_url=f"https://image.tmdb.org/t/p/w500{movie['poster_path']}",
+        )
+
+      db.session.add(selected_movie)              # Adding the movie to the DB
+      db.session.commit()                         # Commiting the changes
+      return redirect(url_for("home"))            # Redirecting the user to the homepage.
+
+    # If the page is first loading (GET Method),
+    # the form with the rating and review fields will be created.
+    return render_template("edit.html", form=form)
 
 
-##Important
+## Important
 If you have any doubts, please visit the code as it is very well documented. Besides that, feel free to contact me, it will be a pleasure to talk and learn with you!
