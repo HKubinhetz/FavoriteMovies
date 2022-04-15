@@ -8,7 +8,7 @@ This is a Flask-based application that uses SQLAlchemy, APIs and Bootstrap to bu
 A great functionality of this application is the "Add Movie". It fetches the search query into an API and allows the user to select exactly the movie they want.
 As soon as a movie is selected, the user inputs a rating and a comment. Then it is displayed on the homepage with the others, according to the highest ratings.
 This was all made possible thanks to the awesome TMDB, also known as [The Movie Database](https://www.themoviedb.org/).
-![Uploading Add.gif…]()
+![Add](https://user-images.githubusercontent.com/31540553/163640145-7833166e-5f81-4f98-b6d4-9589f6528687.gif)
 
 
 ## Editing a Movie
