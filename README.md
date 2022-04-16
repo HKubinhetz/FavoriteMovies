@@ -52,4 +52,4 @@ Here's a quick example of what you can expect.
 
 
 ## Important
-If you have any doubts, please visit the code as it is very well documented. Besides that, feel free to contact me, it will be a pleasure to talk and learn with you!
+If you have any doubts, please visit the code as it is very well documented. Besides that, feel free to contact me, it will be a pleasure to talk and learn with you! I'm also available for helping in your own projects!
